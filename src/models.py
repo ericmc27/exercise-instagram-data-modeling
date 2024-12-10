@@ -7,26 +7,34 @@ from eralchemy2 import render_er
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+class Follower(Base):
+    __tablename__ = "Follower"
+    id = Column(Integer, primary_key=True, unique=True, nullable=False, autoincrement=True)
+    user_from_id = Column(Integer, ForeignKey('User.id'), nullable=False)
+    user_to_id = Column(Integer, ForeignKey('User.id'), nullable=False)
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
 
-    def to_dict(self):
-        return {}
+class User(Base):
+    __tablename__ = "User"
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    username = Column(String, unique=True, nullable=False)
+    firstname = Column(String, unique=False, nullable=False)
+    lastname = Column(String, unique=False, nullable=False)
+    email = Column(String, unique=True, nullable=False)
+    followers = relationship("Follower", foreign_keys=[Follower.user_to_id], backref='followed_user')
+    following = relationship("Follower", foreign_keys=[Follower.user_from_id], backref='following_user')
+
+class Comment(Base):
+    __tablename__ = "Comment"
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    comment_text = Column(String)
+    author_id = Column(Integer, ForeignKey('User.id'), nullable=False)
+    post_id = Column(Integer, ForeignKey('Post.id'), nullable=False)
+
+class Post(Base):
+    __tablename__ = "Post"
+    id = Column(Integer, primary_key=True, autoincrement=True, nullable=False)
+    user_id = Column(Integer, ForeignKey('User.id'))
 
 ## Draw from SQLAlchemy base
 try:
